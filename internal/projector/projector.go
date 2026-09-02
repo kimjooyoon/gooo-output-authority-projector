@@ -95,12 +95,12 @@ func (d *Decision) addUnknown(stage, step, reason, unknownClass, nextOperation, 
 		d.Status = StatusUnknown
 		d.Reason = reason
 		d.Unknown = &Unknown{
-		Stage:         stage,
-		Step:          step,
-		Reason:        reason,
-		UnknownClass:  unknownClass,
-		NextOperation: nextOperation,
-		BlockedBy:     blockedBy,
+			Stage:         stage,
+			Step:          step,
+			Reason:        reason,
+			UnknownClass:  unknownClass,
+			NextOperation: nextOperation,
+			BlockedBy:     blockedBy,
 		}
 	}
 }
