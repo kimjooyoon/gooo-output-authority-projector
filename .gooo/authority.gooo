@@ -1,0 +1,122 @@
+authority "gooo-output-authority-projector" version "0.1"
+
+# This file is the semantic authority for generated path capabilities.
+# Paths are symbolic until a caller-owned root and repository root are supplied.
+precedence = ["REFUTED", "UNKNOWN", "CLOSED"]
+repository_writes = 0
+destructive_operations_executed = 0
+
+tool "projector" {
+  input_roots = ["${CALLER_ROOT}/input"]
+  owned_output_roots = ["${CALLER_ROOT}/output"]
+  cleanup_roots = ["${CALLER_ROOT}/output"]
+  append_only_evidence_paths = ["${CALLER_ROOT}/evidence/replay.jsonl"]
+  forbidden_ancestors = ["${CALLER_ROOT}", "${REPOSITORY_ROOT}"]
+  forbidden_siblings = ["${CALLER_ROOT}/../sibling"]
+}
+
+tool "evidence-writer" {
+  input_roots = ["${CALLER_ROOT}/input"]
+  owned_output_roots = ["${CALLER_ROOT}/output/overlap"]
+  cleanup_roots = []
+  append_only_evidence_paths = ["${CALLER_ROOT}/evidence/replay.jsonl"]
+  forbidden_ancestors = ["${CALLER_ROOT}", "${REPOSITORY_ROOT}"]
+  forbidden_siblings = ["${CALLER_ROOT}/../sibling"]
+}
+
+# Exactly twelve cells and twelve activities are the executable Gooo contract.
+cell "FOUNDATION-01" kind "FOUNDATION" {
+  vector = ["case=valid-nested-output", "status=CLOSED"]
+  activity "DRIVER-01" kind "DRIVER" {
+    operation = "project"
+    assertion = "nested output below the caller-owned output root is accepted"
+  }
+}
+
+cell "FOUNDATION-02" kind "FOUNDATION" {
+  vector = ["case=valid-own-subtree-cleanup", "status=CLOSED"]
+  activity "DRIVER-02" kind "DRIVER" {
+    operation = "cleanup"
+    assertion = "cleanup is projected only inside the caller-owned output subtree"
+  }
+}
+
+cell "FOUNDATION-03" kind "FOUNDATION" {
+  vector = ["case=shared-temp-ancestor-deletion", "status=REFUTED"]
+  activity "DRIVER-03" kind "DRIVER" {
+    operation = "cleanup"
+    assertion = "an ancestor of the caller-owned root is a known boundary violation"
+  }
+}
+
+cell "FOUNDATION-04" kind "FOUNDATION" {
+  vector = ["case=sibling-deletion", "status=REFUTED"]
+  activity "DRIVER-04" kind "DRIVER" {
+    operation = "cleanup"
+    assertion = "a sibling of the caller-owned root is never owned"
+  }
+}
+
+cell "COHERENCE-01" kind "COHERENCE" {
+  vector = ["case=repository-root-write", "status=REFUTED"]
+  activity "OUTCOME-01" kind "OUTCOME" {
+    operation = "write"
+    assertion = "repository-root writes are refused and never executed"
+  }
+}
+
+cell "COHERENCE-02" kind "COHERENCE" {
+  vector = ["case=symlink-escape", "status=REFUTED"]
+  activity "OUTCOME-02" kind "OUTCOME" {
+    operation = "project"
+    assertion = "canonical resolution cannot escape the caller-owned root"
+  }
+}
+
+cell "COHERENCE-03" kind "COHERENCE" {
+  vector = ["case=parent-traversal", "status=REFUTED"]
+  activity "OUTCOME-03" kind "OUTCOME" {
+    operation = "project"
+    assertion = "parent traversal is refused before path cleaning"
+  }
+}
+
+cell "COHERENCE-04" kind "COHERENCE" {
+  vector = ["case=missing-authority", "status=UNKNOWN"]
+  activity "OUTCOME-04" kind "OUTCOME" {
+    operation = "project"
+    assertion = "a missing authority identity cannot authorize a write"
+  }
+}
+
+cell "REGRESSION-01" kind "REGRESSION" {
+  vector = ["case=stale-authority-digest", "status=UNKNOWN"]
+  activity "GUARDRAIL-01" kind "GUARDRAIL" {
+    operation = "project"
+    assertion = "a stale semantic authority digest is not trusted"
+  }
+}
+
+cell "REGRESSION-02" kind "REGRESSION" {
+  vector = ["case=overlapping-ownership", "status=UNKNOWN"]
+  activity "GUARDRAIL-02" kind "GUARDRAIL" {
+    operation = "project"
+    assertion = "ambiguous ownership remains unknown"
+  }
+}
+
+cell "REGRESSION-03" kind "REGRESSION" {
+  vector = ["case=append-only-overwrite", "status=REFUTED"]
+  activity "GUARDRAIL-03" kind "GUARDRAIL" {
+    operation = "append_evidence"
+    assertion = "append-only evidence cannot be overwritten"
+  }
+}
+
+cell "REGRESSION-04" kind "REGRESSION" {
+  vector = ["case=deterministic-replay", "status=CLOSED"]
+  activity "GUARDRAIL-04" kind "GUARDRAIL" {
+    operation = "replay"
+    assertion = "the same identity and request produce the same receipt"
+  }
+}
