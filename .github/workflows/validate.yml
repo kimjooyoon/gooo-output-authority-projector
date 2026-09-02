@@ -56,7 +56,6 @@ jobs:
           set -euo pipefail
           digest="sha256:$(sha256sum .gooo/authority.gooo | awk '{print $1}')"
           grep -F "$digest" internal/projector/generated_authority_projector.go
-          fi
 
       - name: Run tests
         run: go test ./...
