@@ -51,8 +51,8 @@ func GeneratedAuthority() Authority {
 			"REGRESSION": 4,
 		},
 		IndicatorCounts: map[string]int{
-			"DRIVER":   4,
-			"OUTCOME":  4,
+			"DRIVER":    4,
+			"OUTCOME":   4,
 			"GUARDRAIL": 4,
 		},
 		RepositoryWrites:      0,

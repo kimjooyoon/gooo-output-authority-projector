@@ -37,10 +37,10 @@ type CaseResult struct {
 }
 
 type ReplayArtifact struct {
-	CellID       string `json:"cell_id"`
-	ProofChoice  string `json:"proof_choice"`
-	Indicator    string `json:"indicator"`
-	Match        bool   `json:"match"`
+	CellID        string `json:"cell_id"`
+	ProofChoice   string `json:"proof_choice"`
+	Indicator     string `json:"indicator"`
+	Match         bool   `json:"match"`
 	ReceiptDigest string `json:"receipt_digest"`
 }
 
