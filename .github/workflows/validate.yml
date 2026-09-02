@@ -35,6 +35,7 @@ jobs:
           if [[ -n "$files" && -n "$(gofmt -d -e $files)" ]]; then
             gofmt -d -e $files
             exit 1
+          fi
 
       - name: Check Gooo authority shape
         shell: bash
