@@ -4,7 +4,7 @@ This repository turns the repeated â€œcleaned the whole Actions temp directoryâ€
 
 ## Contract
 
-The contract contains exactly 12 cells and exactly 12 Gooo activities: four FOUNDATION, four COHERENCE, and four REGRESSION cells; plus four DRIVER, four OUTCOME, and four GUARDRAIL activities. Each cell exposes a vector, never a scalar score. Status precedence is `REFUTED > UNKNOWN > CLOSED`.
+The contract contains exactly 12 cells and exactly 12 Gooo activities: four FOUNDATION, four COHERENCE, and four REGRESSION cells; plus four DRIVER, four OUTCOME, and four GUARDRAIL activities. Each cell explicitly emits one `proof_choice` and one `indicator`; their exact counts are four per declared value. Each cell exposes a vector, never a scalar score. Status precedence is `REFUTED > UNKNOWN > CLOSED`.
 
 The deterministic vector covers valid nested output, valid own-subtree cleanup, shared-temp ancestor deletion, sibling deletion, repository-root write, symlink escape, parent traversal, missing authority, stale authority digest, overlapping ownership, append-only overwrite, and deterministic replay. A known boundary violation is REFUTED. Absent, stale, or ambiguous ownership is UNKNOWN, with stage, step, reason, unknown class, next operation, and blocked-by evidence in every UNKNOWN receipt.
 
@@ -36,4 +36,4 @@ GitHub Actions is the validation boundary. It uses Go 1.27.x to format-check, te
 
 ## Release policy
 
-Release tags are annotated and never rewritten. The release workflow refuses an existing release, creates a draft first, attaches digests, and publishes only after draft creation. Any historical non-immutable release would be preserved as `OPERATIONAL_REFUTED` and followed by the next immutable version; this repository starts with no such history.
+Release tags are annotated and never rewritten. The release workflow refuses an existing release, creates a draft first, attaches digests, and publishes only after draft creation. v0.1.0 is preserved exactly as a semantic-refuted predecessor because its artifact lacked literal proof/indicator fields; v0.1.1 carries the correction. Any historical non-immutable release would be preserved as `OPERATIONAL_REFUTED` and followed by the next immutable version.

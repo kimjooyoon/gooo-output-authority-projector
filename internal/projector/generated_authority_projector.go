@@ -4,7 +4,7 @@ package projector
 
 const (
 	GeneratedAuthorityIdentity = "gooo-output-authority-projector@0.1"
-	GeneratedAuthorityDigest   = "sha256:aec01ba0a679faa6cc7dd70551e238bdb2bff47f26ecbd5c3b375ddd44cf2535"
+	GeneratedAuthorityDigest   = "sha256:1e803f8b4528e1dc5694c38d8f37dc2e8fdd863ebbd4e840e409dc8b2cf4b8dd"
 	GeneratedArtifactCount     = 1
 )
 
@@ -30,6 +30,30 @@ func GeneratedAuthority() Authority {
 				ForbiddenAncestors:      []string{"${CALLER_ROOT}", "${REPOSITORY_ROOT}"},
 				ForbiddenSiblings:       []string{"${CALLER_ROOT}/../sibling"},
 			},
+		},
+		Cells: []CellBinding{
+			{CellID: "FOUNDATION-01", ProofChoice: "FOUNDATION", Indicator: "DRIVER"},
+			{CellID: "FOUNDATION-02", ProofChoice: "FOUNDATION", Indicator: "DRIVER"},
+			{CellID: "FOUNDATION-03", ProofChoice: "FOUNDATION", Indicator: "DRIVER"},
+			{CellID: "FOUNDATION-04", ProofChoice: "FOUNDATION", Indicator: "DRIVER"},
+			{CellID: "COHERENCE-01", ProofChoice: "COHERENCE", Indicator: "OUTCOME"},
+			{CellID: "COHERENCE-02", ProofChoice: "COHERENCE", Indicator: "OUTCOME"},
+			{CellID: "COHERENCE-03", ProofChoice: "COHERENCE", Indicator: "OUTCOME"},
+			{CellID: "COHERENCE-04", ProofChoice: "COHERENCE", Indicator: "OUTCOME"},
+			{CellID: "REGRESSION-01", ProofChoice: "REGRESSION", Indicator: "GUARDRAIL"},
+			{CellID: "REGRESSION-02", ProofChoice: "REGRESSION", Indicator: "GUARDRAIL"},
+			{CellID: "REGRESSION-03", ProofChoice: "REGRESSION", Indicator: "GUARDRAIL"},
+			{CellID: "REGRESSION-04", ProofChoice: "REGRESSION", Indicator: "GUARDRAIL"},
+		},
+		ProofChoiceCounts: map[string]int{
+			"FOUNDATION": 4,
+			"COHERENCE":  4,
+			"REGRESSION": 4,
+		},
+		IndicatorCounts: map[string]int{
+			"DRIVER":    4,
+			"OUTCOME":   4,
+			"GUARDRAIL": 4,
 		},
 		RepositoryWrites:      0,
 		DestructiveOperations: 0,

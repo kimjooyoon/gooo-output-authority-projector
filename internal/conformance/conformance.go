@@ -1,6 +1,7 @@
 package conformance
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -27,10 +28,20 @@ type CaseResult struct {
 	ActivityID     string             `json:"activity_id"`
 	ActivityKind   string             `json:"activity_kind"`
 	Name           string             `json:"name"`
+	ProofChoice    string             `json:"proof_choice"`
+	Indicator      string             `json:"indicator"`
 	Vector         []string           `json:"vector"`
 	ExpectedStatus projector.Status   `json:"expected_status"`
 	Decision       projector.Decision `json:"decision"`
 	ReplayMatch    *bool              `json:"replay_match,omitempty"`
+}
+
+type ReplayArtifact struct {
+	CellID        string `json:"cell_id"`
+	ProofChoice   string `json:"proof_choice"`
+	Indicator     string `json:"indicator"`
+	Match         bool   `json:"match"`
+	ReceiptDigest string `json:"receipt_digest"`
 }
 
 type ExternalState struct {
@@ -42,7 +53,10 @@ type Report struct {
 	AuthorityIdentity         string             `json:"authority_identity"`
 	AuthorityDigest           string             `json:"authority_digest"`
 	StatusPrecedence          []projector.Status `json:"status_precedence"`
+	ProofChoiceCounts         map[string]int     `json:"proof_choice_counts"`
+	IndicatorCounts           map[string]int     `json:"indicator_counts"`
 	Cases                     []CaseResult       `json:"cases"`
+	Replay                    ReplayArtifact     `json:"replay"`
 	Metrics                   projector.Metrics  `json:"metrics"`
 	ExternalUtility           ExternalState      `json:"external_utility"`
 	PerformanceImprovement    ExternalState      `json:"performance_improvement"`
@@ -57,15 +71,22 @@ func Run(callerRoot, repositoryRoot string) (Report, error) {
 	authority := projector.GeneratedAuthority()
 	cases := buildCases(callerRoot, repositoryRoot)
 	results := make([]CaseResult, 0, len(cases))
+	proofChoiceCounts := cloneCounts(authority.ProofChoiceCounts)
+	indicatorCounts := cloneCounts(authority.IndicatorCounts)
 	accepted, unknown, refuted := 0, 0, 0
 	ancestorDeleteAttempts, siblingOverlapAttempts := 0, 0
 	for _, testCase := range cases {
+		testCase.Request.CellID = testCase.CellID
 		decision := projector.Project(testCase.Request)
 		replayMatch := (*bool)(nil)
 		if testCase.Name == "deterministic-replay" {
 			replay := projector.Project(testCase.Request)
 			match := decisionsEqual(decision, replay)
 			replayMatch = &match
+		}
+		binding, ok := authority.BindingForCell(testCase.CellID)
+		if !ok {
+			return Report{}, fmt.Errorf("missing generated binding for %s", testCase.CellID)
 		}
 		switch decision.Status {
 		case projector.StatusClosed:
@@ -88,17 +109,32 @@ func Run(callerRoot, repositoryRoot string) (Report, error) {
 			ActivityID:     testCase.ActivityID,
 			ActivityKind:   testCase.ActivityKind,
 			Name:           testCase.Name,
+			ProofChoice:    binding.ProofChoice,
+			Indicator:      binding.Indicator,
 			Vector:         testCase.Vector,
 			ExpectedStatus: testCase.Expected,
 			Decision:       decision,
 			ReplayMatch:    replayMatch,
 		})
 	}
+	replayBinding, ok := authority.BindingForCell("REGRESSION-04")
+	if !ok {
+		return Report{}, fmt.Errorf("missing generated binding for REGRESSION-04")
+	}
 	return Report{
 		AuthorityIdentity: authority.Identity,
 		AuthorityDigest:   authority.Digest,
 		StatusPrecedence:  authority.Precedence,
+		ProofChoiceCounts: proofChoiceCounts,
+		IndicatorCounts:   indicatorCounts,
 		Cases:             results,
+		Replay: ReplayArtifact{
+			CellID:        replayBinding.CellID,
+			ProofChoice:   replayBinding.ProofChoice,
+			Indicator:     replayBinding.Indicator,
+			Match:         results[len(results)-1].ReplayMatch != nil && *results[len(results)-1].ReplayMatch,
+			ReceiptDigest: results[len(results)-1].Decision.ReceiptDigest,
+		},
 		Metrics: projector.Metrics{
 			RequestedPaths:         len(cases),
 			OwnedRoots:             len(authority.Tools["projector"].OwnedOutputRoots) + len(authority.Tools["evidence-writer"].OwnedOutputRoots),
@@ -123,7 +159,7 @@ func Run(callerRoot, repositoryRoot string) (Report, error) {
 			Reason: "exact same-identity before/after evidence is absent",
 		},
 		LocalValidationCount:      0,
-		OperationalRefutedHistory: []string{},
+		OperationalRefutedHistory: []string{"v0.1.0:SEMANTIC_REFUTED_MISSING_PROOF_INDICATOR_FIELDS"},
 	}, nil
 }
 
@@ -189,6 +225,14 @@ func withPeer(request projector.Request, peer string) projector.Request {
 func withExisting(request projector.Request, existing *bool) projector.Request {
 	request.ExistingTarget = existing
 	return request
+}
+
+func cloneCounts(counts map[string]int) map[string]int {
+	clone := make(map[string]int, len(counts))
+	for key, value := range counts {
+		clone[key] = value
+	}
+	return clone
 }
 
 func decisionsEqual(left, right projector.Decision) bool {

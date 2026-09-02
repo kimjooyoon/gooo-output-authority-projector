@@ -5,6 +5,7 @@ authority "gooo-output-authority-projector" version "0.1"
 precedence = ["REFUTED", "UNKNOWN", "CLOSED"]
 repository_writes = 0
 destructive_operations_executed = 0
+predecessor_status = "v0.1.0:SEMANTIC_REFUTED_MISSING_PROOF_INDICATOR_FIELDS"
 
 tool "projector" {
   input_roots = ["${CALLER_ROOT}/input"]
@@ -26,6 +27,8 @@ tool "evidence-writer" {
 
 # Exactly twelve cells and twelve activities are the executable Gooo contract.
 cell "FOUNDATION-01" kind "FOUNDATION" {
+  proof_choice = "FOUNDATION"
+  indicator = "DRIVER"
   vector = ["case=valid-nested-output", "status=CLOSED"]
   activity "DRIVER-01" kind "DRIVER" {
     operation = "project"
@@ -34,6 +37,8 @@ cell "FOUNDATION-01" kind "FOUNDATION" {
 }
 
 cell "FOUNDATION-02" kind "FOUNDATION" {
+  proof_choice = "FOUNDATION"
+  indicator = "DRIVER"
   vector = ["case=valid-own-subtree-cleanup", "status=CLOSED"]
   activity "DRIVER-02" kind "DRIVER" {
     operation = "cleanup"
@@ -42,6 +47,8 @@ cell "FOUNDATION-02" kind "FOUNDATION" {
 }
 
 cell "FOUNDATION-03" kind "FOUNDATION" {
+  proof_choice = "FOUNDATION"
+  indicator = "DRIVER"
   vector = ["case=shared-temp-ancestor-deletion", "status=REFUTED"]
   activity "DRIVER-03" kind "DRIVER" {
     operation = "cleanup"
@@ -50,6 +57,8 @@ cell "FOUNDATION-03" kind "FOUNDATION" {
 }
 
 cell "FOUNDATION-04" kind "FOUNDATION" {
+  proof_choice = "FOUNDATION"
+  indicator = "DRIVER"
   vector = ["case=sibling-deletion", "status=REFUTED"]
   activity "DRIVER-04" kind "DRIVER" {
     operation = "cleanup"
@@ -58,6 +67,8 @@ cell "FOUNDATION-04" kind "FOUNDATION" {
 }
 
 cell "COHERENCE-01" kind "COHERENCE" {
+  proof_choice = "COHERENCE"
+  indicator = "OUTCOME"
   vector = ["case=repository-root-write", "status=REFUTED"]
   activity "OUTCOME-01" kind "OUTCOME" {
     operation = "write"
@@ -66,6 +77,8 @@ cell "COHERENCE-01" kind "COHERENCE" {
 }
 
 cell "COHERENCE-02" kind "COHERENCE" {
+  proof_choice = "COHERENCE"
+  indicator = "OUTCOME"
   vector = ["case=symlink-escape", "status=REFUTED"]
   activity "OUTCOME-02" kind "OUTCOME" {
     operation = "project"
@@ -74,6 +87,8 @@ cell "COHERENCE-02" kind "COHERENCE" {
 }
 
 cell "COHERENCE-03" kind "COHERENCE" {
+  proof_choice = "COHERENCE"
+  indicator = "OUTCOME"
   vector = ["case=parent-traversal", "status=REFUTED"]
   activity "OUTCOME-03" kind "OUTCOME" {
     operation = "project"
@@ -82,6 +97,8 @@ cell "COHERENCE-03" kind "COHERENCE" {
 }
 
 cell "COHERENCE-04" kind "COHERENCE" {
+  proof_choice = "COHERENCE"
+  indicator = "OUTCOME"
   vector = ["case=missing-authority", "status=UNKNOWN"]
   activity "OUTCOME-04" kind "OUTCOME" {
     operation = "project"
@@ -90,6 +107,8 @@ cell "COHERENCE-04" kind "COHERENCE" {
 }
 
 cell "REGRESSION-01" kind "REGRESSION" {
+  proof_choice = "REGRESSION"
+  indicator = "GUARDRAIL"
   vector = ["case=stale-authority-digest", "status=UNKNOWN"]
   activity "GUARDRAIL-01" kind "GUARDRAIL" {
     operation = "project"
@@ -98,6 +117,8 @@ cell "REGRESSION-01" kind "REGRESSION" {
 }
 
 cell "REGRESSION-02" kind "REGRESSION" {
+  proof_choice = "REGRESSION"
+  indicator = "GUARDRAIL"
   vector = ["case=overlapping-ownership", "status=UNKNOWN"]
   activity "GUARDRAIL-02" kind "GUARDRAIL" {
     operation = "project"
@@ -106,6 +127,8 @@ cell "REGRESSION-02" kind "REGRESSION" {
 }
 
 cell "REGRESSION-03" kind "REGRESSION" {
+  proof_choice = "REGRESSION"
+  indicator = "GUARDRAIL"
   vector = ["case=append-only-overwrite", "status=REFUTED"]
   activity "GUARDRAIL-03" kind "GUARDRAIL" {
     operation = "append_evidence"
@@ -114,6 +137,8 @@ cell "REGRESSION-03" kind "REGRESSION" {
 }
 
 cell "REGRESSION-04" kind "REGRESSION" {
+  proof_choice = "REGRESSION"
+  indicator = "GUARDRAIL"
   vector = ["case=deterministic-replay", "status=CLOSED"]
   activity "GUARDRAIL-04" kind "GUARDRAIL" {
     operation = "replay"

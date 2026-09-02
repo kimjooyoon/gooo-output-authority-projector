@@ -16,8 +16,18 @@ func project(request Request, authority Authority) Decision {
 		Status:    StatusClosed,
 		Operation: request.Operation,
 		Tool:      request.Tool,
+		CellID:    request.CellID,
 		Target:    request.Target,
 		Reason:    "accepted within the caller-owned capability boundary",
+	}
+
+	if request.CellID != "" {
+		if binding, ok := authority.BindingForCell(request.CellID); ok {
+			decision.ProofChoice = binding.ProofChoice
+			decision.Indicator = binding.Indicator
+		} else {
+			decision.addUnknown("authority", "resolve-cell-binding", "the requested cell has no explicit proof or indicator binding", "missing_cell_binding", "supply the generated cell binding", "semantic authority")
+		}
 	}
 
 	capabilities, knownTool := authority.Tools[request.Tool]

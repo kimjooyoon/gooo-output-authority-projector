@@ -49,6 +49,12 @@ jobs:
           [[ "$(grep -c 'kind \"DRIVER\"' .gooo/authority.gooo)" == 4 ]]
           [[ "$(grep -c 'kind \"OUTCOME\"' .gooo/authority.gooo)" == 4 ]]
           [[ "$(grep -c 'kind \"GUARDRAIL\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'proof_choice = \"FOUNDATION\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'proof_choice = \"COHERENCE\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'proof_choice = \"REGRESSION\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'indicator = \"DRIVER\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'indicator = \"OUTCOME\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'indicator = \"GUARDRAIL\"' .gooo/authority.gooo)" == 4 ]]
 
       - name: Check generated authority digest
         shell: bash
@@ -76,6 +82,18 @@ jobs:
             --caller-root "$caller_root" \
             --repository-root "$GITHUB_WORKSPACE" \
             --output "$caller_root/output/conformance-report.json"
+
+      - name: Require explicit proof and indicator dimensions
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '
+            ([.cases[] | select((.proof_choice // "") == "" or (.indicator // "") == "")] | length) == 0
+            and (.proof_choice_counts == {"FOUNDATION":4,"COHERENCE":4,"REGRESSION":4})
+            and (.indicator_counts == {"DRIVER":4,"OUTCOME":4,"GUARDRAIL":4})
+            and (.replay.proof_choice == "REGRESSION")
+            and (.replay.indicator == "GUARDRAIL")
+          ' "$RUNNER_TEMP/gooo-caller-owned/output/conformance-report.json"
 
       - name: Assemble validation artifact
         shell: bash

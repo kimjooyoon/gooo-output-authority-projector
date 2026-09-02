@@ -33,6 +33,9 @@ type Decision struct {
 	Status          Status    `json:"status"`
 	Operation       Operation `json:"operation"`
 	Tool            string    `json:"tool"`
+	CellID          string    `json:"cell_id"`
+	ProofChoice     string    `json:"proof_choice"`
+	Indicator       string    `json:"indicator"`
 	Target          string    `json:"target"`
 	CanonicalTarget string    `json:"canonical_target,omitempty"`
 	Reason          string    `json:"reason"`
@@ -43,6 +46,7 @@ type Decision struct {
 type Request struct {
 	Tool              string    `json:"tool"`
 	Operation         Operation `json:"operation"`
+	CellID            string    `json:"cell_id,omitempty"`
 	Target            string    `json:"target"`
 	CallerOwnedRoot   string    `json:"caller_owned_root"`
 	RepositoryRoot    string    `json:"repository_root"`
@@ -61,11 +65,20 @@ type Capabilities struct {
 	ForbiddenSiblings       []string `json:"forbidden_siblings"`
 }
 
+type CellBinding struct {
+	CellID      string `json:"cell_id"`
+	ProofChoice string `json:"proof_choice"`
+	Indicator   string `json:"indicator"`
+}
+
 type Authority struct {
 	Identity              string                  `json:"identity"`
 	Digest                string                  `json:"digest"`
 	Precedence            []Status                `json:"precedence"`
 	Tools                 map[string]Capabilities `json:"tools"`
+	Cells                 []CellBinding           `json:"cells"`
+	ProofChoiceCounts     map[string]int          `json:"proof_choice_counts"`
+	IndicatorCounts       map[string]int          `json:"indicator_counts"`
 	RepositoryWrites      int                     `json:"repository_writes"`
 	DestructiveOperations int                     `json:"destructive_operations_executed"`
 }
@@ -101,4 +114,13 @@ func (d Decision) MarshalForDigest() ([]byte, error) {
 	copyDecision := d
 	copyDecision.ReceiptDigest = ""
 	return json.Marshal(copyDecision)
+}
+
+func (a Authority) BindingForCell(cellID string) (CellBinding, bool) {
+	for _, binding := range a.Cells {
+		if binding.CellID == cellID {
+			return binding, true
+		}
+	}
+	return CellBinding{}, false
 }
