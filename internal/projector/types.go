@@ -41,49 +41,49 @@ type Decision struct {
 }
 
 type Request struct {
-	Tool                 string    `json:"tool"`
-	Operation            Operation `json:"operation"`
-	Target               string    `json:"target"`
-	CallerOwnedRoot      string    `json:"caller_owned_root"`
-	RepositoryRoot       string    `json:"repository_root"`
-	AuthorityIdentity    string    `json:"authority_identity"`
-	AuthorityDigest      string    `json:"authority_digest"`
-	PeerOwnedRoots       []string  `json:"peer_owned_roots,omitempty"`
-	ExistingTarget       *bool     `json:"existing_target,omitempty"`
+	Tool              string    `json:"tool"`
+	Operation         Operation `json:"operation"`
+	Target            string    `json:"target"`
+	CallerOwnedRoot   string    `json:"caller_owned_root"`
+	RepositoryRoot    string    `json:"repository_root"`
+	AuthorityIdentity string    `json:"authority_identity"`
+	AuthorityDigest   string    `json:"authority_digest"`
+	PeerOwnedRoots    []string  `json:"peer_owned_roots,omitempty"`
+	ExistingTarget    *bool     `json:"existing_target,omitempty"`
 }
 
 type Capabilities struct {
-	InputRoots               []string `json:"input_roots"`
-	OwnedOutputRoots         []string `json:"owned_output_roots"`
-	CleanupRoots             []string `json:"cleanup_roots"`
-	AppendOnlyEvidencePaths  []string `json:"append_only_evidence_paths"`
-	ForbiddenAncestors       []string `json:"forbidden_ancestors"`
-	ForbiddenSiblings        []string `json:"forbidden_siblings"`
+	InputRoots              []string `json:"input_roots"`
+	OwnedOutputRoots        []string `json:"owned_output_roots"`
+	CleanupRoots            []string `json:"cleanup_roots"`
+	AppendOnlyEvidencePaths []string `json:"append_only_evidence_paths"`
+	ForbiddenAncestors      []string `json:"forbidden_ancestors"`
+	ForbiddenSiblings       []string `json:"forbidden_siblings"`
 }
 
 type Authority struct {
-	Identity             string                 `json:"identity"`
-	Digest               string                 `json:"digest"`
-	Precedence           []Status               `json:"precedence"`
-	Tools                map[string]Capabilities `json:"tools"`
-	RepositoryWrites     int                    `json:"repository_writes"`
-	DestructiveOperations int                   `json:"destructive_operations_executed"`
+	Identity              string                  `json:"identity"`
+	Digest                string                  `json:"digest"`
+	Precedence            []Status                `json:"precedence"`
+	Tools                 map[string]Capabilities `json:"tools"`
+	RepositoryWrites      int                     `json:"repository_writes"`
+	DestructiveOperations int                     `json:"destructive_operations_executed"`
 }
 
 type Metrics struct {
-	RequestedPaths            int    `json:"requested_paths"`
-	OwnedRoots                int    `json:"owned_roots"`
-	AcceptedOperations        int    `json:"accepted_operations"`
-	UnknownOperations         int    `json:"unknown_operations"`
-	RefutedOperations         int    `json:"refuted_operations"`
-	AncestorDeleteAttempts    int    `json:"ancestor_delete_attempts"`
-	SiblingOverlapAttempts    int    `json:"sibling_overlap_attempts"`
-	RepositoryWrites          int    `json:"repository_writes"`
-	DestructiveOperations     int    `json:"destructive_operations_executed"`
-	GeneratedArtifactCount    int    `json:"generated_artifact_count"`
-	WallMilliseconds          *int64 `json:"wall_ms"`
-	RSSBytes                  *int64 `json:"rss_bytes"`
-	MeasurementStatus         Status `json:"measurement_status"`
+	RequestedPaths         int    `json:"requested_paths"`
+	OwnedRoots             int    `json:"owned_roots"`
+	AcceptedOperations     int    `json:"accepted_operations"`
+	UnknownOperations      int    `json:"unknown_operations"`
+	RefutedOperations      int    `json:"refuted_operations"`
+	AncestorDeleteAttempts int    `json:"ancestor_delete_attempts"`
+	SiblingOverlapAttempts int    `json:"sibling_overlap_attempts"`
+	RepositoryWrites       int    `json:"repository_writes"`
+	DestructiveOperations  int    `json:"destructive_operations_executed"`
+	GeneratedArtifactCount int    `json:"generated_artifact_count"`
+	WallMilliseconds       *int64 `json:"wall_ms"`
+	RSSBytes               *int64 `json:"rss_bytes"`
+	MeasurementStatus      Status `json:"measurement_status"`
 }
 
 func (s Status) Rank() int {

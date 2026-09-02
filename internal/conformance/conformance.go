@@ -1,6 +1,5 @@
 package conformance
 
-
 import (
 	"os"
 	"path/filepath"
@@ -22,16 +21,16 @@ type Case struct {
 }
 
 type CaseResult struct {
-	ID             string           `json:"id"`
-	CellID         string           `json:"cell_id"`
-	CellKind       string           `json:"cell_kind"`
-	ActivityID     string           `json:"activity_id"`
-	ActivityKind   string           `json:"activity_kind"`
-	Name           string           `json:"name"`
-	Vector         []string         `json:"vector"`
-	ExpectedStatus projector.Status  `json:"expected_status"`
+	ID             string             `json:"id"`
+	CellID         string             `json:"cell_id"`
+	CellKind       string             `json:"cell_kind"`
+	ActivityID     string             `json:"activity_id"`
+	ActivityKind   string             `json:"activity_kind"`
+	Name           string             `json:"name"`
+	Vector         []string           `json:"vector"`
+	ExpectedStatus projector.Status   `json:"expected_status"`
 	Decision       projector.Decision `json:"decision"`
-	ReplayMatch    *bool            `json:"replay_match,omitempty"`
+	ReplayMatch    *bool              `json:"replay_match,omitempty"`
 }
 
 type ExternalState struct {
@@ -40,15 +39,15 @@ type ExternalState struct {
 }
 
 type Report struct {
-	AuthorityIdentity       string                    `json:"authority_identity"`
-	AuthorityDigest         string                    `json:"authority_digest"`
-	StatusPrecedence        []projector.Status        `json:"status_precedence"`
-	Cases                   []CaseResult              `json:"cases"`
-	Metrics                 projector.Metrics          `json:"metrics"`
-	ExternalUtility         ExternalState             `json:"external_utility"`
-	PerformanceImprovement  ExternalState             `json:"performance_improvement"`
-	LocalValidationCount    int                       `json:"local_validation_count"`
-	OperationalRefutedHistory []string                `json:"operational_refuted_history"`
+	AuthorityIdentity         string             `json:"authority_identity"`
+	AuthorityDigest           string             `json:"authority_digest"`
+	StatusPrecedence          []projector.Status `json:"status_precedence"`
+	Cases                     []CaseResult       `json:"cases"`
+	Metrics                   projector.Metrics  `json:"metrics"`
+	ExternalUtility           ExternalState      `json:"external_utility"`
+	PerformanceImprovement    ExternalState      `json:"performance_improvement"`
+	LocalValidationCount      int                `json:"local_validation_count"`
+	OperationalRefutedHistory []string           `json:"operational_refuted_history"`
 }
 
 func Run(callerRoot, repositoryRoot string) (Report, error) {
@@ -96,10 +95,10 @@ func Run(callerRoot, repositoryRoot string) (Report, error) {
 		})
 	}
 	return Report{
-		AuthorityIdentity:        authority.Identity,
-		AuthorityDigest:          authority.Digest,
-		StatusPrecedence:         authority.Precedence,
-		Cases:                    results,
+		AuthorityIdentity: authority.Identity,
+		AuthorityDigest:   authority.Digest,
+		StatusPrecedence:  authority.Precedence,
+		Cases:             results,
 		Metrics: projector.Metrics{
 			RequestedPaths:         len(cases),
 			OwnedRoots:             len(authority.Tools["projector"].OwnedOutputRoots) + len(authority.Tools["evidence-writer"].OwnedOutputRoots),
@@ -109,11 +108,11 @@ func Run(callerRoot, repositoryRoot string) (Report, error) {
 			AncestorDeleteAttempts: ancestorDeleteAttempts,
 			SiblingOverlapAttempts: siblingOverlapAttempts,
 			RepositoryWrites:       authority.RepositoryWrites,
-			DestructiveOperations:   authority.DestructiveOperations,
-			GeneratedArtifactCount:  projector.GeneratedArtifactCount,
-			WallMilliseconds:        nil,
-			RSSBytes:                nil,
-			MeasurementStatus:       projector.StatusUnknown,
+			DestructiveOperations:  authority.DestructiveOperations,
+			GeneratedArtifactCount: projector.GeneratedArtifactCount,
+			WallMilliseconds:       nil,
+			RSSBytes:               nil,
+			MeasurementStatus:      projector.StatusUnknown,
 		},
 		ExternalUtility: ExternalState{
 			Status: "UNKNOWN",
