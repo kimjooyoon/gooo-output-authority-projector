@@ -1,0 +1,73 @@
+name: Draft immutable release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Annotated tag that already exists on the validated commit
+        required: true
+        type: string
+      publish:
+        description: Publish the already-created draft after its asset digest is checked
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          token: ${{ github.token }}
+          fetch-depth: 0
+
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.27.x
+          check-latest: true
+
+      - name: Require an annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git cat-file -t "refs/tags/$TAG")" == "tag" ]]
+
+      - name: Build release artifact
+        run: go build -trimpath -o "$RUNNER_TEMP/gooo-output-authority-projector" ./cmd/gooo-output-authority-projector
+
+      - name: Refuse release or tag mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release already exists; immutable history is preserved"
+            exit 1
+          fi
+
+      - name: Create draft release first
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum "$RUNNER_TEMP/gooo-output-authority-projector" > "$RUNNER_TEMP/SHA256SUMS"
+          gh release create "$TAG" \
+            "$RUNNER_TEMP/gooo-output-authority-projector#gooo-output-authority-projector" \
+            "$RUNNER_TEMP/SHA256SUMS#SHA256SUMS" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft \
+            --verify-tag \
+            --title "Gooo output authority projector $TAG" \
+            --notes "Draft-first immutable annotated release. Tag and assets are never rewritten."
+
+      - name: Publish only after draft creation
+        if: ${{ inputs.publish }}
+        run: gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false

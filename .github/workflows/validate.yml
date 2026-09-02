@@ -1,0 +1,95 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.27.x
+          check-latest: true
+          cache: false
+
+      - name: Check Go formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(git ls-files '*.go')"
+          if [[ -n "$files" && -n "$(gofmt -d -e $files)" ]]; then
+            gofmt -d -e $files
+            exit 1
+          fi
+
+      - name: Check Gooo authority shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(grep -c '^cell ' .gooo/authority.gooo)" == 12 ]]
+          [[ "$(grep -c '^  activity ' .gooo/authority.gooo)" == 12 ]]
+          [[ "$(grep -c 'kind \"FOUNDATION\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'kind \"COHERENCE\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'kind \"REGRESSION\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'kind \"DRIVER\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'kind \"OUTCOME\"' .gooo/authority.gooo)" == 4 ]]
+          [[ "$(grep -c 'kind \"GUARDRAIL\"' .gooo/authority.gooo)" == 4 ]]
+
+      - name: Check generated authority digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="sha256:$(sha256sum .gooo/authority.gooo | awk '{print $1}')"
+          grep -F "$digest" internal/projector/generated_authority_projector.go
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build projector
+        run: go build -trimpath -o "$RUNNER_TEMP/gooo-output-authority-projector" ./cmd/gooo-output-authority-projector
+
+      - name: Run safe conformance projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          caller_root="$RUNNER_TEMP/gooo-caller-owned"
+          mkdir -p "$caller_root/output"
+          go run ./cmd/gooo-output-authority-projector conformance \
+            --caller-root "$caller_root" \
+            --repository-root "$GITHUB_WORKSPACE" \
+            --output "$caller_root/output/conformance-report.json"
+
+      - name: Assemble validation artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact_root="$RUNNER_TEMP/gooo-output-authority-artifact"
+          mkdir -p "$artifact_root"
+          cp "$RUNNER_TEMP/gooo-output-authority-projector" "$artifact_root/gooo-output-authority-projector"
+          cp "$RUNNER_TEMP/gooo-caller-owned/output/conformance-report.json" "$artifact_root/conformance-report.json"
+          sha256sum "$artifact_root"/* > "$artifact_root/SHA256SUMS"
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gooo-output-authority-projector-validation
+          path: ${{ runner.temp }}/gooo-output-authority-artifact
+          if-no-files-found: error
